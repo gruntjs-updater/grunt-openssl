@@ -1,0 +1,40 @@
+{
+  "name": "grunt-openssl",
+  "description": "Encrypt files with openssl",
+  "version": "0.0.0",
+  "homepage": "https://github.com/jdewit/grunt-openssl",
+  "author": {
+    "name": "Joris de Wit",
+    "email": "joris.w.dewit@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jdewit/grunt-openssl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jdewit/grunt-openssl/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt": "~0.4.2"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.2"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
