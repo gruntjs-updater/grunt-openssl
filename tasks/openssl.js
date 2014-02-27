@@ -19,6 +19,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('openssl', 'Encrypt files with openssl', function() {
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
+      salt: '',
       cipher: 'cast5-cbc',
       affix: '.cast5-cbc'
     });
@@ -37,11 +38,12 @@ module.exports = function(grunt) {
           return;
         }
 
-        var cipher = crypto.createCipher(options.cipher, grunt.option('encrypt'));
+        var cipher = crypto.createCipher(options.cipher, grunt.option('encrypt') + options.salt);
 
         fs.readFile(filepath, function(err, text) {
           var encrypted = cipher.update(text, 'utf8', 'hex');
           encrypted += cipher.final('hex');
+
           fs.writeFile(filepath + options.affix, encrypted, {encoding: 'hex'}, function() {
             grunt.log.writeln('Encrypted ' + filepath);
           });
@@ -53,14 +55,17 @@ module.exports = function(grunt) {
           return;
         }
 
-        var decipher = crypto.createDecipher(options.cipher, grunt.option('decrypt'));
+        var decipher = crypto.createDecipher(options.cipher, grunt.option('decrypt') + options.salt);
+
         fs.readFile(filepath, {encoding: 'hex'}, function(err, text) {
           var decrypted = decipher.update(text, 'hex', 'utf8');
           decrypted += decipher.final('utf8');
-          fs.writeFile(filepath.replace(options.prefix, '').replace(options.affix, ''), decrypted, function() {
+
+          var originalFilepath = filepath.replace(options.affix, '');
+
+          fs.writeFile(originalFilepath, decrypted, function() {
             grunt.log.writeln('Decrypted ' + filepath);
           });
-
         });
 
       } else {

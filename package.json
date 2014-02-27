@@ -1,7 +1,7 @@
 {
   "name": "grunt-openssl",
   "description": "Encrypt files with openssl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/jdewit/grunt-openssl",
   "author": {
     "name": "Joris de Wit",
