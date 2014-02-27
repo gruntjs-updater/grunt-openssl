@@ -8,7 +8,8 @@
 
 'use strict';
 
-var exec = require('child_process').exec;
+var crypto = require('crypto'),
+    fs = require('fs');
 
 module.exports = function(grunt) {
 
@@ -19,13 +20,10 @@ module.exports = function(grunt) {
     // Merge task-specific and/or target-specific options with these defaults.
     var options = this.options({
       cipher: 'cast5-cbc',
-      prefix: '',
       affix: '.cast5-cbc'
     });
 
-    var cb = this.async();
-    var cmd;
-    var log;
+    this.async();
 
     if (!options.prefix && !options.affix) {
       throw new Error('Prefix or affix must be set');
@@ -33,45 +31,42 @@ module.exports = function(grunt) {
 
     this.filesSrc.forEach(function(filepath) {
 
-      if (grunt.option('encrypt')) {
-        if ((options.prefix && filepath.match(options.prefix)) || (options.affix && filepath.match(options.affix))) {
+      if (grunt.option('encrypt')) { // encrypt
+
+        if (options.affix && filepath.match(options.affix)) { // do not encrypt already encrypted files
           return;
         }
 
-        cmd = 'openssl ' + options.cipher + ' -e -in ' + filepath + ' -out ' + options.prefix + filepath + options.affix;
-        log = 'Encrypting ' + filepath;
-      } else if (grunt.option('decrypt')) {
-        if ((options.prefix && !filepath.match(options.prefix)) || (options.affix && !filepath.match(options.affix))) {
+        var cipher = crypto.createCipher(options.cipher, grunt.option('encrypt'));
+
+        fs.readFile(filepath, function(err, text) {
+          var encrypted = cipher.update(text, 'utf8', 'hex');
+          encrypted += cipher.final('hex');
+          fs.writeFile(filepath + options.affix, encrypted, {encoding: 'hex'}, function() {
+            grunt.log.writeln('Encrypted ' + filepath);
+          });
+        });
+
+      } else if (grunt.option('decrypt')) { // decrypt
+
+        if (options.affix && !filepath.match(options.affix)) { // do not decode already decoded files
           return;
         }
-        cmd = 'openssl ' + options.cipher + ' -d -in ' + filepath + ' -out ' + filepath.replace(options.prefix, '').replace(options.affix, '');
-        log = 'Decrypting ' + filepath;
+
+        var decipher = crypto.createDecipher(options.cipher, grunt.option('decrypt'));
+        fs.readFile(filepath, {encoding: 'hex'}, function(err, text) {
+          var decrypted = decipher.update(text, 'hex', 'utf8');
+          decrypted += decipher.final('utf8');
+          fs.writeFile(filepath.replace(options.prefix, '').replace(options.affix, ''), decrypted, function() {
+            grunt.log.writeln('Decrypted ' + filepath);
+          });
+
+        });
+
       } else {
-          throw new Error('Argument required.');
+          throw new Error('Argument required. See readme.');
       }
 
-      var cp = exec(cmd, {stdin: true, stdout: true}, function (err, stdout, stderr) {
-        if (err && options.failOnError) {
-          grunt.warn(err);
-        }
-        cb();
-      }.bind(this));
-
-      var captureOutput = function (child, output) {
-        child.on('data', function (data) {
-          output.write(data);
-        });
-      };
-
-      captureOutput(cp.stdout, process.stdout);
-
-      captureOutput(cp.stderr, process.stderr);
-
-      process.stdin.resume();
-			process.stdin.setEncoding('utf8');
-			process.stdin.pipe(cp.stdin);
-
-      grunt.log.writeln(log);
     });
   });
 };

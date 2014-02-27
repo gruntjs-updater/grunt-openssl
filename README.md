@@ -36,6 +36,6 @@ grunt.initConfig({
 
 ### Usage
 
-$ grunt openssl -encrypt 
+$ grunt openssl --encrypt=yourPassword
 
-$ grunt openssl -decrypt 
+$ grunt openssl --decrypt=yourPassword
