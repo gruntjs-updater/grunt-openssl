@@ -23,13 +23,14 @@ grunt.loadNpmTasks('grunt-openssl');
 
 ```js
 grunt.initConfig({
-  options: { # these are the defaults
-    cipher: 'cast5-cbc',
-    salt: '',
-    prefix: '',
-    affix: '.cast5-cbc'
-  },
+
   openssl: {
+    options: { # these are the defaults
+      cipher: 'cast5-cbc',
+      salt: '',
+      prefix: '',
+      affix: '.cast5-cbc'
+    },
     myConfigs: ['path/configs/*.yml*']
   }
 });
